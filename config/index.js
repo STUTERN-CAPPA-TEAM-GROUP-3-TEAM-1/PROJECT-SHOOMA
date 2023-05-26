@@ -13,4 +13,6 @@ console.log('Server set up to', environment, '!!!')
 
 // export const config = environment === 'development' ? {...development} : {...production};
 
-export const config = environment === 'development' ? { ...development } : environment === 'staging' ? { ...staging } : { ...production };
+export const config = environment.trim() === 'development' ? { ...development } : environment.trim() === 'staging' ? { ...staging } : { ...production };
+
+
