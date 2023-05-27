@@ -16,32 +16,32 @@ export default class CreateAccountWithSocial {
     static async createAccountwithFB (req, res, next) {
 
       
-        try {
-          const response = await axios.get(`https://graph.facebook.com/v15.0/me?fields=id,name,first_name,last_name&access_token=${authToken}`);
-          console.log (response.data)
-          const { id, name, first_name, last_name } = response.data;
-        
-          // Perform further actions with the user's data
-          const newUser = new User ({
-            Id: response.data.id,
-            first_name: response.data.first_name,
-            last_name: response.data.last_name,
-            name: response.data.name,
-          })
-
-          await newUser.save();
-          
-          res.json( {
-            message: "User created successfully",
-            status: "Success",
-            id, name, first_name, last_name})
-          
-            } catch (error) {
-          console.error('Access token validation failed:', error.response.data);
-          res.status(500).send("Access Validation Failed")
-          
-        }
+      try {
+        const response = await axios.get(`https://graph.facebook.com/v15.0/me?fields=id,name,first_name,last_name&access_token=${authToken}`);
+        console.log (response.data)
+        const { id, name, first_name, last_name } = response.data;
       
+        // Perform further actions with the user's data
+        const newUser = new User ({
+          Id: response.data.id,
+          first_name: response.data.first_name,
+          last_name: response.data.last_name,
+          name: response.data.name,
+        })
+
+        res.json( {
+          message: "User created successfully",
+          status: "Success",
+          id, name, first_name, last_name})
+
+        newUser.save();
+
+          } catch (error) {
+        console.error('Access token validation failed:', error.response.data);
+        res.status(500).send("Access Validation Failed")
+      }
+
+
 
       
  
