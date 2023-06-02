@@ -7,7 +7,8 @@ import { tryCatchHandler } from "../utils/catchAsync.js";
 
 const router = new express.Router();
 
-router.post("/signup/facebook", tryCatchHandler (CreateAccountWithSocial.createAccountwithFB))
-// router.get("/getToken/google", tryCatchHandler (GoogleAuth.CreateGoogleAuthToken))
+router.post("/signup/facebook", tryCatchHandler (CreateAccountWithSocial.createAccountwithFB));
+
+// router.get("/getToken/google", tryCatchHandler (GoogleAuth.CreateGoogleAuthToken));
 
 export { router }

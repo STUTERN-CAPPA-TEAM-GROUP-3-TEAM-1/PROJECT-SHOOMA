@@ -10,6 +10,11 @@ const app = express()
 
 
 
+//Password Reset
+import passwordReset from "./src/controllers/passportConfig.js"
+app.post("/resetPassword", passwordReset);
+
+
 //Databse connection
 mongoose.connect(config.mongodb_connection_url).then(() => console.log("Database Connection Established")).catch((e) => console.log(e.message));
 console.log(config.mongodb_connection_url)
