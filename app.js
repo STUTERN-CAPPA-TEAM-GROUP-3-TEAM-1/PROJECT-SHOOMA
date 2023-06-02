@@ -1,38 +1,31 @@
 import express from "express";
 import mongoose from "mongoose";
-import { config } from "./config/index.js";
 import { router as userRouter } from "./src/routes/user-route.js";
 import { globalErrorHandler } from "./src/utils/errorHandlers.js";
+import config from "config";
 
+const app = express();
 
-
-const app = express()
-
-
-
-//Databse connection
-mongoose.connect(config.mongodb_connection_url).then(() => console.log("Database Connection Established")).catch((e) => console.log(e.message));
-console.log(config.mongodb_connection_url)
+mongoose
+  .connect(config.get("db.uri"))
+  .then(() =>
+    console.log("Database Connection Established", config.get("db.uri"))
+  )
+  .catch((e) => console.log(e.message));
 
 // PORT
-const port = config.port || 8080;
+const port = config.get('app.port')
 
+app.use(express.json());
 
-// Middlewares
-app.use(express.json())
-
-app.use("/api/shooma/user", userRouter)
+app.use("/api/shooma/user", userRouter);
 
 app.use(globalErrorHandler);
 
-
-
 // setting up port
-app.listen(port, ()=>{
-    console.log(`server listening on port: ${port}`)
+app.listen(port, () => {
+  console.log(`server listening on port: ${port}`);
 });
-
-
 
 // global error handler
 // app.use((err, req, res, next)=>{
