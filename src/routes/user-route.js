@@ -10,4 +10,4 @@ router.post("/auth/sign-up/facebook", tryCatchHandler (AuthController.createAcco
 router.post("/auth/sign-up", tryCatchHandler (AuthController.createAccount))
 router.post("/auth/login", tryCatchHandler (AuthController.login))
 
-export { router }
+export default router;
