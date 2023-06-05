@@ -6,6 +6,7 @@ import {
   loginValidator,
 } from "../validators/auth.validator.js";
 import bcrypt from "bcrypt";
+import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR } from "../utils/constant.js";
 
 export default class AuthController {
   static async createAccountWithFB(req, res, next) {
@@ -81,7 +82,7 @@ export default class AuthController {
     try {
       const { error } = loginValidator.validate(req.body);
       if (error) {
-        return res.status(400).json({
+        return res.status(BAD_REQUEST).json({
           status: false,
           message: "There's a missing field in your input",
           error,
@@ -103,13 +104,13 @@ export default class AuthController {
           message: "Invalid Username or Password",
         });
       }
-      return res.status(200).json({
+      return res.status(CREATED).json({
         status: true,
         message: "Logged in successfully",
         data: user,
       });
     } catch (e) {
-      return res.status(500).json({
+      return res.status(INTERNAL_SERVER_ERROR).json({
         status: false,
         message: "Internal Server Error",
       });
