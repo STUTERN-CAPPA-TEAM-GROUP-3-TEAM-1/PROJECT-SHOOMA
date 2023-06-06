@@ -8,35 +8,32 @@ const PostSchema = new Schema({
   likes: {
     type: Number,
   },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
   comments: [
     {
       user: {
         type: Schema.Types.ObjectId,
-        ref: "user",
+        ref: "User",
       },
       text: {
         type: String,
       },
     },
   ],
-
-  repost: [
+  rePost: [
     {
       user: {
         type: Schema.Types.ObjectId,
-        ref: "user",
+        ref: "User",
       },
-      
     },
   ],
-
-  image : {
+  image: {
     type: String,
   },
-
-  
 });
 
-
-  
-  export default model("Post", PostSchema);
+export default model("Post", PostSchema);

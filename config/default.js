@@ -17,6 +17,7 @@ export default {
     prefix: "/api/v1",
     resourceRegex: "^/resources/[a-zA-Z-]+",
     versions: 1,
+    expiresIn: '60d',
   },
   db: {
     uri: process.env.DB_URL || "mongodb://localhost:27017/shooma",
