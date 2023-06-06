@@ -1,10 +1,10 @@
-import express from "express";
+import { Router } from "express";
 
 import AuthController from '../controllers/auth.controller.js';
 import { tryCatchHandler } from "../utils/catchAsync.js";
 
 
-const router = new express.Router();
+const router = Router();
 
 router.post("/auth/sign-up/facebook", tryCatchHandler (AuthController.createAccountWithFB))
 router.post("/auth/sign-up", tryCatchHandler (AuthController.createAccount))

@@ -6,7 +6,12 @@ import {
   loginValidator,
 } from "../validators/auth.validator.js";
 import bcrypt from "bcrypt";
-import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR } from "../utils/constant.js";
+import {
+  BAD_REQUEST,
+  CREATED,
+  INTERNAL_SERVER_ERROR,
+} from "../utils/constant.js";
+import { signToken } from "../utils/helper.js";
 
 export default class AuthController {
   static async createAccountWithFB(req, res, next) {
@@ -24,16 +29,17 @@ export default class AuthController {
       });
       await newUser.save();
       return res.json({
+        status: true,
         message: "User created successfully",
-        status: "Success",
-        id,
-        name,
-        first_name,
-        last_name,
+        data: {
+          id,
+          name,
+          first_name,
+          last_name,
+        },
       });
     } catch (error) {
-      console.error("Access token validation failed:", error.response.data);
-      res.status(500).send("Access Validation Failed");
+      return next(error);
     }
   }
 
@@ -48,8 +54,7 @@ export default class AuthController {
       console.log(`User ID: ${id}`);
       return res.json({ id });
     } catch (error) {
-      console.error("Access token validation failed:", error.response.data);
-      return res.status(500).send("Access Validation Failed");
+      return next(error);
     }
   }
 
@@ -57,25 +62,31 @@ export default class AuthController {
     try {
       const { error } = createUserValidator.validate(req.body);
       if (error) {
-        return res.status(400).json({
+        return res.status(BAD_REQUEST).json({
           status: false,
           message: "There's a missing field in your input",
           error,
         });
       }
       req.body.password = bcrypt.hashSync(req.body.password, 10);
-      let user = new User(req.body);
+      let user = await User.findOne({ username: req.body.username });
+      if (user) {
+        return res.status(BAD_REQUEST).json({
+          status: false,
+          message: "User with this username already exists",
+        });
+      }
+      user = new User(req.body);
       user = await user.save();
-      return res.status(200).json({
+      const token = signToken({ id: user._id, username: user.username });
+      return res.status(CREATED).json({
         status: true,
         message: "User created successfully",
+        token,
         data: user,
       });
     } catch (e) {
-      return res.status(500).json({
-        status: false,
-        message: "Internal Server Error",
-      });
+      return next(e);
     }
   }
   static async login(req, res, next) {
@@ -98,22 +109,22 @@ export default class AuthController {
         });
       }
       const password = bcrypt.compareSync(req.body.password, user.password);
+      user.password = undefined;
       if (!password) {
-        return res.status(401).json({
+        return res.status(BAD_REQUEST).json({
           status: false,
           message: "Invalid Username or Password",
         });
       }
+      const token = signToken({ id: user._id, username: user.username });
       return res.status(CREATED).json({
         status: true,
         message: "Logged in successfully",
+        token,
         data: user,
       });
     } catch (e) {
-      return res.status(INTERNAL_SERVER_ERROR).json({
-        status: false,
-        message: "Internal Server Error",
-      });
+      return next(e);
     }
   }
 }

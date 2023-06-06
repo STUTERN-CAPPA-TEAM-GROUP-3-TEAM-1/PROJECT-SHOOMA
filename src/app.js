@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import authRouter from "./routes/user-route.js";
+import postRouter from "./routes/post-route";
 import config from "config";
 import error from "./middlewares/error.js";
 import logger from "morgan";
@@ -27,6 +28,7 @@ const port = config.get("app.port");
 app.use(express.json());
 
 app.use("/api/v1", authRouter);
+app.use("/api/v1", postRouter);
 
 app.use((req, res, next) => {
   const err = new Error("Not Found");
