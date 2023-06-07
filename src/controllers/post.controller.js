@@ -29,9 +29,12 @@ export default class PostController {
   }
   static async find(req, res, next) {
     try {
+      const posts = await Post.find();
+      
       return res.status(OK).json({
-        status: false,
-        message: "Find Posts",
+        status: true,
+        message: 'Posts found',
+        data: posts,
       });
     } catch (error) {
       return next(error);
@@ -39,9 +42,20 @@ export default class PostController {
   }
   static async findOne(req, res, next) {
     try {
+      const postId = req.params.id;
+      const post = await Post.findById(postId);
+      
+      if (!post) {
+        return res.status(BAD_REQUEST).json({
+          status: false,
+          message: 'Post not found',
+        });
+      }
+      
       return res.status(OK).json({
-        status: false,
-        message: "Find one post",
+        status: true,
+        message: 'Post found',
+        data: post,
       });
     } catch (error) {
       return next(error);
@@ -50,9 +64,21 @@ export default class PostController {
 
   static async update(req, res, next) {
     try {
+      const postId = req.params.id;
+      const updateData = req.body;
+      const updatedPost = await Post.findByIdAndUpdate(postId, updateData, { new: true });
+  
+      if (!updatedPost) {
+        return res.status(BAD_REQUEST).json({
+          status: false,
+          message: 'Post not found',
+        });
+      }
+  
       return res.status(OK).json({
-        status: false,
-        message: "Update post",
+        status: true,
+        message: 'Post updated successfully',
+        data: updatedPost,
       });
     } catch (error) {
       return next(error);
@@ -60,9 +86,19 @@ export default class PostController {
   }
   static async delete(req, res, next) {
     try {
+      const postId = req.params.id;
+      const deletedPost = await Post.findByIdAndDelete(postId);
+  
+      if (!deletedPost) {
+        return res.status(BAD_REQUEST).json({
+          status: false,
+          message: 'Post not deleted',
+        });
+      }
+  
       return res.status(OK).json({
-        status: false,
-        message: "Delete post",
+        status: true,
+        message: 'Post deleted successfully',
       });
     } catch (error) {
       return next(error);
