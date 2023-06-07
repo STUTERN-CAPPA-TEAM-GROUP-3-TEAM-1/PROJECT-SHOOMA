@@ -17,4 +17,25 @@ router
   .put(auth, tryCatchHandler(PostController.update))
   .delete(auth, tryCatchHandler(PostController.delete));
 
+// Filter posts
+router.get("/filter", auth, PostController.filterPosts);
+
+// Browse posts
+router.get("/browse", auth, PostController.browsePosts);
+
+// Search posts
+router.get("/search", auth, PostController.searchPosts);
+
+// Get post details
+router.get("/:id", auth, PostController.getPost);
+
+// Sort posts
+router.get("/sort", auth, PostController.sortPosts);
+
+
+router
+  .route("/posts/:id/seller/contact")
+  .get(auth, tryCatchHandler(PostController.getSellerContactDetails))
+  .post(auth, tryCatchHandler(PostController.contactSellerOffline));
+
 export default router;
