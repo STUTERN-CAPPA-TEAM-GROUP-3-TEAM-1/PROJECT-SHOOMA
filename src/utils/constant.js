@@ -10,3 +10,6 @@ export const INTERNAL_SERVER_ERROR = 500;
 export const CREATE = "create";
 export const UPDATE = "update";
 export const DELETE = "delete";
+
+export const PROFILE = "profile";
+

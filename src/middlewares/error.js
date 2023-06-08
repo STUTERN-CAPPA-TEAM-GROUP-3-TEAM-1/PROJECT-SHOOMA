@@ -9,6 +9,7 @@ export default (error, req, res, next) => {
     meta["statusCode"] = code;
     meta["error"] = {
       code,
+      
       message: "Some setup problems with datastore, please try again",
     };
     meta["developerMessage"] = error;
