@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const PORT = process.env.PORT || 7000;
 
-export default {
+module.exports =  {
   app: {
     appName: process.env.APP_NAME || "ShoomaApp",
     environment: process.env.NODE_ENV || "development",
