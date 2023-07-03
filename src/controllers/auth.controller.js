@@ -12,6 +12,11 @@ import {
 } from "../utils/constant.js";
 import { signToken } from "../utils/helper.js";
 
+
+import { sendResetPasswordEmail } from "../utils/email.js";
+import { generateResetToken } from "../utils/helper.js";
+
+
 export default class AuthController {
   static async createAccountWithFB(req, res, next) {
     try {
@@ -126,4 +131,29 @@ export default class AuthController {
       return next(e);
     }
   }
+
+  static async sendPasswordResetEmail(req, res) {
+    try {
+      const { email } = req.body;
+
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const resetToken = generateResetToken();
+      user.resetToken = resetToken;
+      user.resetTokenExpiry = Date.now() + 3600000; // Token expires in 1 hour
+      await user.save();
+
+      sendResetPasswordEmail(user.email, resetToken);
+
+      return res
+        .status(200)
+        .json({ message: "Password reset email sent successfully" });
+    } catch (error) {
+      return res.status(500).json({ error: "Server error" });
+    }
+  }
 }
+
