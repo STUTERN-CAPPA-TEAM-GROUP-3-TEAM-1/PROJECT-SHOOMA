@@ -7,3 +7,17 @@ export const signToken = (obj) => {
     expiresIn: config.get("api.expiresIn"),
   });
 };
+
+export function generateResetToken() {
+  const tokenLength = 20;
+  const characters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let token = "";
+
+  for (let i = 0; i < tokenLength; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    token += characters[randomIndex];
+  }
+
+  return token;
+}
