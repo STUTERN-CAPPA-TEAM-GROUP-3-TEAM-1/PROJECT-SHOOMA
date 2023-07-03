@@ -13,7 +13,6 @@ import {
 import { signToken } from "../utils/helper.js";
 
 
-import User from "../models/user.model.js";
 import { sendResetPasswordEmail } from "../utils/email.js";
 import { generateResetToken } from "../utils/helper.js";
 
