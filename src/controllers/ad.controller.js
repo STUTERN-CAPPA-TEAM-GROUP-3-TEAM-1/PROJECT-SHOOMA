@@ -1,89 +1,82 @@
-import Ad from "../models/ad.model";
+import Ad from "../models/Ad.js";
+import {
+  createAdSchema,
+  updateAdSchema,
+  getAdSchema,
+  deleteAdSchema,
+} from "../validators/ad.validator.js";
 
-import { NOT_FOUND,BAD_REQUEST, OK } from "../utils/constant";
-
-import { createAdValidator } from "../validators/ad.validator";
-
-
-export default class AdController {
-  static async createAd(req, res, next) {
-    try {
-      const { error } = createAdValidator.validate(req.body);
-      if (error) {
-        return res.status(BAD_REQUEST).json({
-          status: false,
-          message: "There's a missing field in your input",
-          error,
-        });
-      }
-      let ad = new Ad({
-        ...req.body,
-        user: req.authId,
-      });
-      ad = await ad.save();
-      return res.status(OK).json({
-        status: true,
-        message: "Ad created successfully",
-        data: ad,
-      });
-    } catch (error) {
-      console.error(error);
-      return next(error);
-    }
-  }
-
-  static async getAd(req, res, next) {
-    try {
-      const ads = await Ad.find();
-      return res.status(OK).json(ads);
-    } catch (error) {
-      return next(error);
-    }
-  }
-
-  static async getAdById(req, res, next) {
-    try {
-      const ad = await Ad.findById(req.params.id);
-      if (!ad) {
-        return res.status(NOT_FOUND).json({ message: "Ad not found" });
-      }
-      return res.status(OK).json(ad);
-    } catch (error) {
-      return next(error);
-    }
-  }
-
-  static async updateAd(req, res, next) {
+export async function createAd(req, res) {
   try {
-    const { header, image, description, createdAt } = createAdValidator.validate(req.body);
+    const { error } = createAdSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
-    const ad = await Ad.findByIdAndUpdate(
-      req.params.id,
-      { header, image, description, createdAt },
-      { new: true }
-    );
+    const ad = new Ad(req.body);
+    await ad.save();
+
+    return res.status(201).json({ ad });
+  } catch (error) {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function updateAd(req, res) {
+  try {
+    const { error } = updateAdSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const ad = await Ad.findByIdAndUpdate(req.params.adId, req.body, {
+      new: true,
+    });
 
     if (!ad) {
-      return res.status(NOT_FOUND).json({ message: "Ad not found" });
+      return res.status(404).json({ error: "Ad not found" });
     }
 
-    res.json(ad);
+    return res.status(200).json({ ad });
   } catch (error) {
-    return next(error);
+    return res.status(500).json({ error: "Server error" });
   }
 }
 
-static async deleteAd(req, res, next){
-   try {
-     const ad = await Ad.findByIdAndDelete(req.params.id);
+export async function getAd(req, res) {
+  try {
+    const { error } = getAdSchema.validate(req.params);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
-     if (!ad) {
-       return res.status(NOT_FOUND).json({ message: "Ad not found" });
-     }
+    const ad = await Ad.findById(req.params.adId);
 
-     res.json({ message: "Ad deleted successfully" });
-   } catch (error) {
-     return next(error);
-   }
+    if (!ad) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    return res.status(200).json({ ad });
+  } catch (error) {
+    return res.status(500).json({ error: "Server error" });
+  }
 }
+
+export async function deleteAd(req, res) {
+  try {
+    const { error } = deleteAdSchema.validate(req.params);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const ad = await Ad.findByIdAndDelete(req.params.adId);
+
+    if (!ad) {
+      return res.status(404).json({ error: "Ad not found" });
+    }
+
+    return res.status(200).json({ message: "Ad deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: "Server error" });
+  }
 }
