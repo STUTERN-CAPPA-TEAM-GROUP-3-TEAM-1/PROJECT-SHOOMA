@@ -1,7 +1,7 @@
 import Post from "../models/post.model";
 import { BAD_REQUEST, OK } from "../utils/constant";
 import { createPostValidator } from "../validators/post.validator";
-import { SellerController } from "./seller.controller";
+import { SellerController } from "../controllers/seller.controller";
 
 export default class PostController {
   static async create(req, res, next) {
@@ -70,6 +70,8 @@ export default class PostController {
     }
   }
 
+
+
   //.............................Browse Items Section..............................
 
   //............................ User can filter Posts...........................
@@ -91,6 +93,7 @@ export default class PostController {
     }
   }
 
+  
   //............................ User can browse a paginated list of all items on the platfrom...........................
 
   static async browsePosts(req, res, next) {
@@ -137,7 +140,9 @@ export default class PostController {
       const postId = req.params.id;
 
       const post = await Post.findById(postId);
-
+      if (!post) {
+        return res.status(NOT_FOUND).json({ message: "Post not found" });
+      }
       return res.status(OK).json({
         status: true,
         message: "Post details",
