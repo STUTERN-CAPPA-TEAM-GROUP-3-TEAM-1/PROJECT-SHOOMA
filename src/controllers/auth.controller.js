@@ -1,6 +1,5 @@
 import User from "../models/user.model.js";
 import axios from "axios";
-import config from "config";
 import {
   createUserValidator,
   loginValidator,

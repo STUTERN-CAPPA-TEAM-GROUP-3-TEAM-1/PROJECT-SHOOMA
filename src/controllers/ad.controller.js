@@ -1,89 +1,85 @@
 import Ad from "../models/ad.model";
-
-import { NOT_FOUND,BAD_REQUEST, OK } from "../utils/constant";
-
-import { createAdValidator } from "../validators/ad.validator";
-
+import {
+  createAdSchema,
+  updateAdSchema,
+  getAdSchema,
+  deleteAdSchema,
+} from "../validators/ad.validator.js";
 
 export default class AdController {
-  static async createAd(req, res, next) {
+  static async createAd(req, res) {
     try {
-      const { error } = createAdValidator.validate(req.body);
+      const { error } = createAdSchema.validate(req.body);
       if (error) {
-        return res.status(BAD_REQUEST).json({
-          status: false,
-          message: "There's a missing field in your input",
-          error,
-        });
+        return res.status(400).json({ error: error.details[0].message });
       }
-      let ad = new Ad({
-        ...req.body,
-        user: req.authId,
-      });
-      ad = await ad.save();
-      return res.status(OK).json({
-        status: true,
-        message: "Ad created successfully",
-        data: ad,
-      });
+
+      const ad = new Ad(req.body);
+      await ad.save();
+
+      return res.status(201).json({ ad });
     } catch (error) {
-      console.error(error);
-      return next(error);
+      return res.status(500).json({ error: "Server error" });
     }
   }
 
-  static async getAd(req, res, next) {
+  static async updateAd(req, res) {
     try {
-      const ads = await Ad.find();
-      return res.status(OK).json(ads);
-    } catch (error) {
-      return next(error);
-    }
-  }
+      const { error } = updateAdSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
 
-  static async getAdById(req, res, next) {
-    try {
-      const ad = await Ad.findById(req.params.id);
+      const ad = await Ad.findByIdAndUpdate(req.params.adId, req.body, {
+        new: true,
+      });
+
       if (!ad) {
-        return res.status(NOT_FOUND).json({ message: "Ad not found" });
+        return res.status(404).json({ error: "Ad not found" });
       }
-      return res.status(OK).json(ad);
+
+      return res.status(200).json({ ad });
     } catch (error) {
-      return next(error);
+      return res.status(500).json({ error: "Server error" });
     }
   }
 
-  static async updateAd(req, res, next) {
-  try {
-    const { header, image, description, createdAt } = createAdValidator.validate(req.body);
+  static async getAd(req, res) {
+    try {
+      const { error } = getAdSchema.validate(req.params);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
 
-    const ad = await Ad.findByIdAndUpdate(
-      req.params.id,
-      { header, image, description, createdAt },
-      { new: true }
-    );
+      const ad = await Ad.findById(req.params.adId);
 
-    if (!ad) {
-      return res.status(NOT_FOUND).json({ message: "Ad not found" });
+      if (!ad) {
+        return res.status(404).json({ error: "Ad not found" });
+      }
+
+      return res.status(200).json({ ad });
+    } catch (error) {
+      return res.status(500).json({ error: "Server error" });
     }
+  }
 
-    res.json(ad);
-  } catch (error) {
-    return next(error);
+  static async deleteAd(req, res) {
+    try {
+      const { error } = deleteAdSchema.validate(req.params);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
+
+      const ad = await Ad.findByIdAndDelete(req.params.adId);
+
+      if (!ad) {
+        return res.status(404).json({ error: "Ad not found" });
+      }
+
+      return res.status(200).json({ message: "Ad deleted successfully" });
+    } catch (error) {
+      return res.status(500).json({ error: "Server error" });
+    }
   }
 }
 
-static async deleteAd(req, res, next){
-   try {
-     const ad = await Ad.findByIdAndDelete(req.params.id);
-
-     if (!ad) {
-       return res.status(NOT_FOUND).json({ message: "Ad not found" });
-     }
-
-     res.json({ message: "Ad deleted successfully" });
-   } catch (error) {
-     return next(error);
-   }
-}
-}
