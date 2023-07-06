@@ -12,15 +12,10 @@ import {
 } from "../utils/constant.js";
 import { signToken } from "../utils/helper.js";
 
-import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
-  auth: {
-    user: process.env.AUTH_EMAIL,
-    pass: process.env.AUTH_PASSWORD,
-  },
-});
+import { sendResetPasswordEmail } from "../utils/email.js";
+import { generateResetToken } from "../utils/helper.js";
+
 
 export default class AuthController {
   static async createAccountWithFB(req, res, next) {
@@ -137,38 +132,28 @@ export default class AuthController {
     }
   }
 
-  static async sendPasswordResetEmail(req, res, next) {
-    const { email } = req.body;
-    // Generate a unique reset token
-    const resetToken = generateResetToken();
+  static async sendPasswordResetEmail(req, res) {
     try {
-      // Save the reset token in the user's document in the database
-      await User.findOneAndUpdate({ email }, { resetToken });
+      const { email } = req.body;
 
-      const mailOptions = {
-        from: process.env.AUTH_EMAIL,
-        to: email,
-        subject: "Password Reset",
-        html: `
-        <p>Hello,</p>
-        <p>You have requested to reset your password. Please click on the link below to create a new password:</p>
-        <a href="http://localhost:3000/reset-password/${resetToken}">Reset Password</a>
-        <p>If you didn't request this, please ignore this email.</p>
-      `,
-      };
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Error sending email:", error);
-          throw error;
-        } else {
-          console.log("Password reset email sent:", info.response);
-          res.status(200).json({ message: "Password reset email sent" });
-        }
-      });
+      const resetToken = generateResetToken();
+      user.resetToken = resetToken;
+      user.resetTokenExpiry = Date.now() + 3600000; // Token expires in 1 hour
+      await user.save();
+
+      sendResetPasswordEmail(user.email, resetToken);
+
+      return res
+        .status(200)
+        .json({ message: "Password reset email sent successfully" });
     } catch (error) {
-      console.error("Error sending password reset email:", error);
-      res.status(500).json({ message: "Failed to send password reset email" });
+      return res.status(500).json({ error: "Server error" });
     }
   }
 }
+

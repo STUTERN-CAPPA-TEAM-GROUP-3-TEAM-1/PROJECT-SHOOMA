@@ -19,7 +19,7 @@ const UserSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ['Female', 'Male'],
+      enum: ["Female", "Male"],
     },
     password: {
       type: String,
@@ -33,6 +33,14 @@ const UserSchema = new Schema(
       type: Number,
       unique: false,
     },
+    resetToken: {
+      type: String,
+      default: null,
+    },
+    resetTokenExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -40,7 +48,7 @@ const UserSchema = new Schema(
 );
 
 UserSchema.pre("save", function (next) {
-  this.name = this.first_name + " " + this.last_name;
+  this.name = this.firstName + " " + this.lastName;
   next();
 });
 
